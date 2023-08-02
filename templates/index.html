@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Parser</title>
+</head>
+<body>
+    <h1>Upload a Zip File Containing Word Documents or PDFs</h1>
+    <form action="/parse" method="post" enctype="multipart/form-data">
+        <input type="file" name="file">
+        <input type="submit" value="Parse">
+        <br>
+        <label for="search_word">Search Words:</label>
+        <input type="checkbox" name="search_word" value="Python">Python
+        <input type="checkbox" name="search_word" value="Javascript">Javascript
+        <input type="checkbox" name="search_word" value="SQL">SQL
+        <input type="checkbox" name="search_word" value="HTML">HTML
+        <input type="checkbox" name="search_word" value="Oracle">Oracle
+    </form>
+    <div>
+        <h2>Score:</h2>
+        <pre id="score"></pre>
+    </div>
+    <script>
+        const form = document.querySelector('form');
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(form);
+            const response = await fetch('/parse', {
+                method: 'POST',
+                body: formData,
+            });
+            const results = await response.json();
+            const scoreDisplay = document.getElementById('score');
+
+            let scoreText = '';
+            for (const filename in results) {
+                scoreText += `File: ${filename}, Score: ${results[filename].score}%\n`;
+            }
+            scoreDisplay.innerText = scoreText;
+        });
+    </script>
+</body>
+</html>
