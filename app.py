@@ -57,11 +57,14 @@ def parse_word_document(file_content):
     return content
 
 def parse_pdf(file_content):
-    pdf_file = PyPDF2.PdfReader(BytesIO(file_content))
     content = ""
-    for page_num in range(len(pdf_file.pages)):
-        page = pdf_file.pages[page_num]
-        content += page.extract_text() + "\n"
+    try:
+        pdf_file = PyPDF2.PdfReader(BytesIO(file_content))
+        for page_num in range(len(pdf_file.pages)):
+            page = pdf_file.pages[page_num]
+            content += page.extract_text() + "\n"
+    except Exception as e:
+        print("Error parsing PDF: ", e)
     return content
 
 if __name__ == '__main__':
