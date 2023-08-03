@@ -2,6 +2,8 @@
 <html>
 <head>
     <title>File Parser</title>
+    <!-- css -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <h1>Upload a Zip File Containing Word Documents or PDFs</h1>
@@ -16,29 +18,44 @@
         <input type="checkbox" name="search_word" value="HTML">HTML
         <input type="checkbox" name="search_word" value="Oracle">Oracle
     </form>
-    <div>
+    <!-- Score display -->
+    <div id="score">
         <h2>Score:</h2>
-        <pre id="score"></pre>
+        <pre id="scoreText"></pre>
     </div>
     <script>
-        // Here lies the only js in the project. I'm not a front-end developer.
         const form = document.querySelector('form');
+    
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             const formData = new FormData(form);
-            const response = await fetch('/parse', {
-                method: 'POST',
-                body: formData,
-            });
-            const results = await response.json();
-            const scoreDisplay = document.getElementById('score');
-
-            let scoreText = '';
-            for (const filename in results) {
-                scoreText += `File: ${filename}, Score: ${results[filename].score}%\n`;
+    
+            try {
+                const response = await fetch('/parse', {
+                    method: 'POST',
+                    body: formData,
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`Server returned an error. Status: ${response.status}`);
+                }
+    
+                const results = await response.json();
+                const scoreDisplay = document.getElementById('scoreText');
+    
+                let scoreText = '';
+                for (const filename in results) {
+                    const score = results[filename].score;
+    
+                    scoreText += `File: ${filename}, Score: ${score}%\n`;
+                }
+                scoreDisplay.innerText = scoreText;
+            } catch (error) {
+                console.error('Error:', error);
+                scoreDisplay.innerText = 'An error occurred. Please try again.';
             }
-            scoreDisplay.innerText = scoreText;
         });
-    </script>
+    </script>    
 </body>
 </html>
+
