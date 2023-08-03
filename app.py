@@ -21,11 +21,14 @@ def parse_files():
     if not zipfile.is_zipfile(zip_file):
         return jsonify({"error": "Invalid zip file"})
 
-    file_contents = {}
-    with zipfile.ZipFile(zip_file, 'r') as zip_archive:
-        for filename in zip_archive.namelist():
-            with zip_archive.open(filename) as file:
-                file_contents[filename] = file.read()
+    try:
+        file_contents = {}
+        with zipfile.ZipFile(zip_file, 'r') as zip_archive:
+            for filename in zip_archive.namelist():
+                with zip_archive.open(filename) as file:
+                    file_contents[filename] = file.read()
+    except zipfile.BadZipFile:
+        return jsonify({"error": "Bad Zip File"})
 
     search_words = request.form.getlist('search_word')
 
@@ -33,7 +36,9 @@ def parse_files():
         return jsonify({"error": "No search words provided"})
 
     results = {}
+    counter = 0
     for filename, file_content in file_contents.items():
+        counter += 1
         if filename.endswith('.docx'):
             parsed_content = parse_word_document(file_content)
         elif filename.endswith('.pdf'):
@@ -46,8 +51,9 @@ def parse_files():
         score = (found_count / total_words) * 100
 
         results[filename] = {"score": score}
-
-    return jsonify(results)
+    
+    sorted_results = dict(sorted(results.items(), key=lambda item: item[1]['score'], reverse=True))
+    return jsonify(sorted_results)
 
 def parse_word_document(file_content):
     doc = Document(BytesIO(file_content))
