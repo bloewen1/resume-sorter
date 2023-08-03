@@ -18,6 +18,8 @@
         <input type="checkbox" name="search_word" value="HTML">HTML
         <input type="checkbox" name="search_word" value="Oracle">Oracle
     </form>
+    <!-- Loading spinner -->
+    <div id="loading-spinner"></div>
     <!-- Score display -->
     <div id="score" style="display: none;">
         <h2>Score:</h2>
@@ -34,16 +36,20 @@
     <script>
         const form = document.querySelector('form');
         const scoreDiv = document.getElementById('score');
+        const loadingSpinner = document.getElementById('loading-spinner');
     
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
             const formData = new FormData(form);
+            loadingSpinner.style.display = 'block'; // Show the loading spinner
     
             try {
                 const response = await fetch('/parse', {
                     method: 'POST',
                     body: formData,
                 });
+    
+                loadingSpinner.style.display = 'none'; // Hide the loading spinner
     
                 if (!response.ok) {
                     throw new Error(`Server returned an error. Status: ${response.status}`);
