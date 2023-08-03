@@ -74,4 +74,6 @@ def parse_pdf(file_content):
     return content
 
 if __name__ == '__main__':
+    # Only need 250 mb of storage
+    app.config['MAX_CONTENT_LENGTH'] = 250 * 1024 * 1024
     app.run(debug=True)

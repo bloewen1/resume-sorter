@@ -19,12 +19,21 @@
         <input type="checkbox" name="search_word" value="Oracle">Oracle
     </form>
     <!-- Score display -->
-    <div id="score">
+    <div id="score" style="display: none;">
         <h2>Score:</h2>
-        <pre id="scoreText"></pre>
+        <table>
+            <thead>
+                <tr>
+                    <th>File Name</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody id="scoreTable"></tbody>
+        </table>
     </div>
     <script>
         const form = document.querySelector('form');
+        const scoreDiv = document.getElementById('score');
     
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -41,17 +50,30 @@
                 }
     
                 const results = await response.json();
-                const scoreDisplay = document.getElementById('scoreText');
-    
-                let scoreText = '';
+                const scoreTable = document.getElementById('scoreTable');
+                scoreTable.innerHTML = '';
+
                 for (const filename in results) {
                     const score = results[filename].score;
     
-                    scoreText += `File: ${filename}, Score: ${score}%\n`;
+                    const row = document.createElement('tr');
+                    const fileNameCell = document.createElement('td');
+                    const scoreCell = document.createElement('td');
+
+                    fileNameCell.textContent = filename;
+                    scoreCell.textContent = `${score}%`;
+
+                    row.appendChild(fileNameCell);
+                    row.appendChild(scoreCell);
+
+                    scoreTable.appendChild(row);
                 }
-                scoreDisplay.innerText = scoreText;
+
+                // Show the score section after getting results
+                scoreDiv.style.display = 'block';
             } catch (error) {
                 console.error('Error:', error);
+                const scoreDisplay = document.getElementById('scoreText');
                 scoreDisplay.innerText = 'An error occurred. Please try again.';
             }
         });
