@@ -1,3 +1,4 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -21,7 +22,6 @@
         <pre id="score"></pre>
     </div>
     <script>
-        // Here lies the only js in the project. I'm not a front-end developer.
         const form = document.querySelector('form');
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -34,9 +34,9 @@
             const scoreDisplay = document.getElementById('score');
 
             let scoreText = '';
-            for (const filename in results) {
-                scoreText += `File: ${filename}, Score: ${results[filename].score}%\n`;
-            }
+            results.forEach((result) => {
+                scoreText += `File: ${result[0]}, Score: ${result[1]}%\n`;
+            });
             scoreDisplay.innerText = scoreText;
         });
     </script>

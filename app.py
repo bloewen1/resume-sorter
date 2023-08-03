@@ -48,12 +48,22 @@ def parse_files():
 
         found_count = sum(word.lower() in parsed_content.lower() for word in search_words)
         total_words = len(search_words)
-        score = (found_count / total_words) * 100
+        score = round((found_count / total_words) * 100, 2)
 
         results[filename] = {"score": score}
-    
+
+
+    # Sort results by score in descending order
     sorted_results = dict(sorted(results.items(), key=lambda item: item[1]['score'], reverse=True))
-    return jsonify(sorted_results)
+
+    # Extract file names and scores separately
+    file_names = list(sorted_results.keys())
+    scores = [sorted_results[filename]['score'] for filename in file_names]
+
+    # Zip the file names and scores together
+    file_scores = list(zip(file_names, scores))
+
+    return jsonify(file_scores)
 
 def parse_word_document(file_content):
     doc = Document(BytesIO(file_content))
