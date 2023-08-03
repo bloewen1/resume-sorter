@@ -3,8 +3,11 @@
 <html>
 <head>
     <title>File Parser</title>
+    <!-- CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+    <!-- File Upload Form -->
     <h1>Upload a Zip File Containing Word Documents or PDFs</h1>
     <form action="/parse" method="post" enctype="multipart/form-data">
         <input type="file" name="file">
@@ -17,28 +20,58 @@
         <input type="checkbox" name="search_word" value="HTML">HTML
         <input type="checkbox" name="search_word" value="Oracle">Oracle
     </form>
-    <div>
+
+    <!-- Loading Spinner -->
+    <div id="loading-spinner"></div>
+
+    <!-- Score Display -->
+    <div id="score" style="display: none;">
         <h2>Score:</h2>
-        <pre id="score"></pre>
+        <table>
+            <thead>
+                <tr>
+                    <th>File Name</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody id="scoreTable"></tbody>
+        </table>
     </div>
+
     <script>
+        // Get the form element and other necessary DOM elements
         const form = document.querySelector('form');
+        const scoreDiv = document.getElementById('score');
+        const loadingSpinner = document.getElementById('loading-spinner');
+    
+        // Add event listener to the form submit button
         form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const formData = new FormData(form);
-            const response = await fetch('/parse', {
-                method: 'POST',
-                body: formData,
-            });
-            const results = await response.json();
-            const scoreDisplay = document.getElementById('score');
+            event.preventDefault(); // Prevent default form submission
+            const formData = new FormData(form); // Get the form data
+            loadingSpinner.style.display = 'block'; // Show the loading spinner
+
+            try {
+                const response = await fetch('/parse', { // Send the form data to the server for processing
+                    method: 'POST',
+                    body: formData,
+                });
+
+                loadingSpinner.style.display = 'none'; // Hide the loading spinner after receiving the response
+
+                if (!response.ok) {
+                    throw new Error(`Server returned an error. Status: ${response.status}`);
+                }
+
+                const results = await response.json(); // Get the results from the response
+                const scoreTable = document.getElementById('scoreTable');
+                scoreTable.innerHTML = ''; // Clear any previous content from the score table
 
             let scoreText = '';
-            results.forEach((result) => {
-                scoreText += `File: ${result[0]}, Score: ${result[1]}%\n`;
-            });
+            for (const filename in results) {
+                scoreText += `File: ${filename}, Score: ${results[filename].score}%\n`;
+            }
             scoreDisplay.innerText = scoreText;
         });
-    </script>
+    </script>    
 </body>
 </html>
