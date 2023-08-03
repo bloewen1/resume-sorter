@@ -2,10 +2,11 @@
 <html>
 <head>
     <title>File Parser</title>
-    <!-- css -->
+    <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+    <!-- File Upload Form -->
     <h1>Upload a Zip File Containing Word Documents or PDFs</h1>
     <form action="/parse" method="post" enctype="multipart/form-data">
         <input type="file" name="file">
@@ -18,9 +19,11 @@
         <input type="checkbox" name="search_word" value="HTML">HTML
         <input type="checkbox" name="search_word" value="Oracle">Oracle
     </form>
-    <!-- Loading spinner -->
+
+    <!-- Loading Spinner -->
     <div id="loading-spinner"></div>
-    <!-- Score display -->
+
+    <!-- Score Display -->
     <div id="score" style="display: none;">
         <h2>Score:</h2>
         <table>
@@ -33,46 +36,50 @@
             <tbody id="scoreTable"></tbody>
         </table>
     </div>
+
     <script>
+        // Get the form element and other necessary DOM elements
         const form = document.querySelector('form');
         const scoreDiv = document.getElementById('score');
         const loadingSpinner = document.getElementById('loading-spinner');
     
+        // Add event listener to the form submit button
         form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const formData = new FormData(form);
+            event.preventDefault(); // Prevent default form submission
+            const formData = new FormData(form); // Get the form data
             loadingSpinner.style.display = 'block'; // Show the loading spinner
-    
+
             try {
-                const response = await fetch('/parse', {
+                const response = await fetch('/parse', { // Send the form data to the server for processing
                     method: 'POST',
                     body: formData,
                 });
-    
-                loadingSpinner.style.display = 'none'; // Hide the loading spinner
-    
+
+                loadingSpinner.style.display = 'none'; // Hide the loading spinner after receiving the response
+
                 if (!response.ok) {
                     throw new Error(`Server returned an error. Status: ${response.status}`);
                 }
-    
-                const results = await response.json();
-                const scoreTable = document.getElementById('scoreTable');
-                scoreTable.innerHTML = '';
 
+                const results = await response.json(); // Get the results from the response
+                const scoreTable = document.getElementById('scoreTable');
+                scoreTable.innerHTML = ''; // Clear any previous content from the score table
+
+                // Populate the score table with the results
                 for (const filename in results) {
                     const score = results[filename].score;
-    
-                    const row = document.createElement('tr');
-                    const fileNameCell = document.createElement('td');
-                    const scoreCell = document.createElement('td');
 
-                    fileNameCell.textContent = filename;
-                    scoreCell.textContent = `${score}%`;
+                    const row = document.createElement('tr'); // Create a new table row
+                    const fileNameCell = document.createElement('td'); // Create a new table cell for the file name
+                    const scoreCell = document.createElement('td'); // Create a new table cell for the score
 
-                    row.appendChild(fileNameCell);
-                    row.appendChild(scoreCell);
+                    fileNameCell.textContent = filename; // Set the file name as the content of the cell
+                    scoreCell.textContent = `${score}%`; // Set the score as the content of the cell
 
-                    scoreTable.appendChild(row);
+                    row.appendChild(fileNameCell); // Add the file name cell to the row
+                    row.appendChild(scoreCell); // Add the score cell to the row
+
+                    scoreTable.appendChild(row); // Add the row to the score table
                 }
 
                 // Show the score section after getting results
@@ -86,4 +93,3 @@
     </script>    
 </body>
 </html>
-
