@@ -4,8 +4,23 @@ from io import BytesIO
 from docx import Document
 import PyPDF2
 import zipfile
+import openpyxl
+import re
+from datetime import datetime
 
 app = Flask(__name__)
+keywords = ["Python", "Javascript", "SQL", "HTML", "Oracle"]
+# If there's an existing workbook, open it, otherwise make a new one
+try:
+    wb = openpyxl.load_workbook("resumes.xlsx")
+except:
+    wb = openpyxl.Workbook()
+
+if "Resumes" in wb.sheetnames:
+    ws = wb["Resumes"]
+else:
+    ws = wb.create_sheet("Resumes")
+    ws.append(["Filename", "Keywords"])
 
 @app.route('/')
 def index():
@@ -43,9 +58,7 @@ def parse_files():
 
     # Process each file in the zip and calculate scores
     results = {}
-    counter = 0
     for filename, file_content in file_contents.items():
-        counter += 1
         if filename.endswith('.docx'):
             parsed_content = parse_word_document(file_content)
         elif filename.endswith('.pdf'):
@@ -53,14 +66,36 @@ def parse_files():
         else:
             continue
 
+        found_words = []
+        for key in keywords:
+            if key.lower() in parsed_content.lower():
+                found_words.append(key)
         found_count = sum(word.lower() in parsed_content.lower() for word in search_words)
         total_words = len(search_words)
-        score = round((found_count / total_words) * 100, 2)
+        score = round((found_count / total_words) * 100)
+        file_keywords = ', '.join(found_words)
 
-        results[filename] = {"score": score}
+    existing_row_index = None
+    for row_index, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+        if row[0] == filename:
+            existing_row_index = row_index
+            break
+
+    if existing_row_index:
+        # Replace existing row if filename already exists
+        ws.delete_rows(existing_row_index)
+        new_row = [filename, file_keywords]
+        ws.insert_rows(existing_row_index, amount=1)
+        for col_index, value in enumerate(new_row, start=1):
+            ws.cell(row=existing_row_index, column=col_index, value=value)
+    else:
+        # Add new row if filename doesn't exist
+        ws.append([filename, file_keywords])
+
+        results[filename] = {"score": score, "date": get_date_from_filename(filename)}
     
     # Sort the results based on the score in descending order
-    sorted_results = dict(sorted(results.items(), key=lambda item: item[1]['score'], reverse=True))
+    sorted_results = dict(sorted(results.items(), key=lambda item: (item[1]['score'], item[1]['date']), reverse=True))
 
     # Extract file names and scores separately
     file_names = list(sorted_results.keys())
@@ -68,6 +103,8 @@ def parse_files():
 
     # Zip the file names and scores together
     file_scores = list(zip(file_names, scores))
+
+    wb.save("resumes.xlsx")
 
     return jsonify(file_scores)
 
@@ -90,6 +127,13 @@ def parse_pdf(file_content):
     except Exception as e:
         print("Error parsing PDF: ", e)
     return content
+
+def get_date_from_filename(filename):
+    match = re.search(r'\d{4}-\d{2}-\d{2}', filename)
+    if match:
+        date_str = match.group(0)
+        return datetime.strptime(date_str, '%Y-%m-%d')
+    return datetime.min  # Return a default date if no match is found
 
 if __name__ == '__main__':
     # Set the maximum content length for file uploads to 250 MB
