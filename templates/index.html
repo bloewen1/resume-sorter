@@ -43,7 +43,7 @@
         const form = document.querySelector('form');
         const scoreDiv = document.getElementById('score');
         const loadingSpinner = document.getElementById('loading-spinner');
-    
+
         // Add event listener to the form submit button
         form.addEventListener('submit', async (event) => {
             event.preventDefault(); // Prevent default form submission
@@ -66,11 +66,34 @@
                 const scoreTable = document.getElementById('scoreTable');
                 scoreTable.innerHTML = ''; // Clear any previous content from the score table
 
-            let scoreText = '';
-            for (const filename in results) {
-                scoreText += `File: ${filename}, Score: ${results[filename].score}%\n`;
+                // Sort results based on score in descending order
+                results.sort((a, b) => b[1] - a[1]);
+
+                // Populate the score table with the sorted results
+                for (const result of results) {
+                    const filename = result[0];
+                    const score = result[1];
+
+                    const row = document.createElement('tr'); // Create a new table row
+                    const fileNameCell = document.createElement('td'); // Create a new table cell for the file name
+                    const scoreCell = document.createElement('td'); // Create a new table cell for the score
+
+                    fileNameCell.textContent = filename; // Set the file name as the content of the cell
+                    scoreCell.textContent = `${score}%`; // Set the score as the content of the cell
+
+                    row.appendChild(fileNameCell); // Add the file name cell to the row
+                    row.appendChild(scoreCell); // Add the score cell to the row
+
+                    scoreTable.appendChild(row); // Add the row to the score table
+                }
+
+                // Show the score section after getting results
+                scoreDiv.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                const scoreDisplay = document.getElementById('scoreText');
+                scoreDisplay.innerText = 'An error occurred. Please try again.';
             }
-            scoreDisplay.innerText = scoreText;
         });
     </script>    
 </body>
