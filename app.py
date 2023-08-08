@@ -75,22 +75,22 @@ def parse_files():
         score = round((found_count / total_words) * 100)
         file_keywords = ', '.join(found_words)
 
-    existing_row_index = None
-    for row_index, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
-        if row[0] == filename:
-            existing_row_index = row_index
-            break
+        existing_row_index = None
+        for row_index, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
+            if row[0] == filename:
+                existing_row_index = row_index
+                break
 
-    if existing_row_index:
-        # Replace existing row if filename already exists
-        ws.delete_rows(existing_row_index)
-        new_row = [filename, file_keywords]
-        ws.insert_rows(existing_row_index, amount=1)
-        for col_index, value in enumerate(new_row, start=1):
-            ws.cell(row=existing_row_index, column=col_index, value=value)
-    else:
-        # Add new row if filename doesn't exist
-        ws.append([filename, file_keywords])
+        if existing_row_index:
+            # Replace existing row if filename already exists
+            ws.delete_rows(existing_row_index)
+            new_row = [filename, file_keywords]
+            ws.insert_rows(existing_row_index, amount=1)
+            for col_index, value in enumerate(new_row, start=1):
+                ws.cell(row=existing_row_index, column=col_index, value=value)
+        else:
+            # Add new row if filename doesn't exist
+            ws.append([filename, file_keywords])
 
         results[filename] = {"score": score, "date": get_date_from_filename(filename)}
     
