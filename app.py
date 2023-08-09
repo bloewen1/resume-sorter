@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect
 import os
 from io import BytesIO
 from docx import Document
@@ -7,6 +7,7 @@ import zipfile
 import openpyxl
 import re
 from datetime import datetime
+import json
 
 app = Flask(__name__)
 keywords = ["Python", "Javascript", "SQL", "HTML", "Oracle"]
@@ -26,6 +27,32 @@ else:
 def index():
     return render_template('index.html')
 
+@app.route('/delete_row', methods=['POST'])
+def delete_row():
+    try:
+        data = request.get_json()  # Get JSON data sent from client
+        filename = data.get('filename')
+
+        for row in ws.iter_rows(min_row=2):
+            if row[0].value == filename:  # Find the row with the specified filename
+                ws.delete_rows(row[0].row)
+                wb.save("resumes.xlsx")
+                return jsonify({"success": True})
+    except Exception as e:
+        print("Error deleting row:", e)
+
+    return jsonify({"success": False})
+
+@app.route('/delete', methods=['POST'])
+def delete():
+    try:
+        ws.delete_rows(2, ws.max_row - 1)  # Delete all rows except the header
+        wb.save("resumes.xlsx")
+    except Exception as e:
+        print("Error deleting data:", e)
+
+    return redirect('/')
+
 @app.route('/score', methods=['POST'])
 def rank_files():
     data = []
@@ -38,7 +65,7 @@ def rank_files():
     search_words = request.form.getlist('search_word')
 
     # Check if search words are provided
-    if len(search_words) == 0:
+    if not search_words or len(search_words) == 0:
         search_words = keywords
 
     results = {}
