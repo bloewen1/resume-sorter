@@ -9,16 +9,20 @@
 <body>
     <!-- File Upload Form -->
     <h1>Upload a Zip File Containing Word Documents or PDFs</h1>
-    <form action="/parse" method="post" enctype="multipart/form-data">
+    <form action="/parse" method="post" enctype="multipart/form-data" id="parse">
         <input type="file" name="file">
         <input type="submit" value="Parse">
-        <br>
+    </form>
+
+    <form action="/score" method="post" enctype="multipart/form-data" id="search">
         <label for="search_word">Search Words:</label>
         <input type="checkbox" name="search_word" value="Python">Python
         <input type="checkbox" name="search_word" value="Javascript">Javascript
         <input type="checkbox" name="search_word" value="SQL">SQL
         <input type="checkbox" name="search_word" value="HTML">HTML
         <input type="checkbox" name="search_word" value="Oracle">Oracle
+        <br>
+        <input type="submit" value="Load Scores">
     </form>
 
     <!-- Loading Spinner -->
@@ -40,18 +44,43 @@
 
     <script>
         // Get the form element and other necessary DOM elements
-        const form = document.querySelector('form');
+        const parseForm = document.getElementById('parse');
+        const searchForm = document.getElementById('search');
         const scoreDiv = document.getElementById('score');
-        const loadingSpinner = document.getElementById('loading-spinner');
+        const loadingSpinner = document.getElementById('loading-spinner')
 
-        // Add event listener to the form submit button
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevent default form submission
-            const formData = new FormData(form); // Get the form data
+        // Add event listener to the parse button
+        parseForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const formData = new FormData(parseForm); // Get the form data
             loadingSpinner.style.display = 'block'; // Show the loading spinner
 
             try {
                 const response = await fetch('/parse', { // Send the form data to the server for processing
+                    method: 'POST',
+                    body: formData,
+                });
+
+                loadingSpinner.style.display = 'none'; // Hide the loading spinner after receiving the response
+
+                if (!response.ok) {
+                    throw new Error(`Server returned an error. Status: ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                const scoreDisplay = document.getElementById('scoreText');
+                scoreDisplay.innerText = 'An error occurred. Please try again.';
+            }
+        });
+
+        // Add event listener to the form submit button
+        searchForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+            const formData = new FormData(searchForm); // Get the form data
+            loadingSpinner.style.display = 'block'; // Show the loading spinner
+
+            try {
+                const response = await fetch('/score', { // Send the form data to the server for processing
                     method: 'POST',
                     body: formData,
                 });

@@ -26,6 +26,42 @@ else:
 def index():
     return render_template('index.html')
 
+@app.route('/score', methods=['POST'])
+def rank_files():
+    data = []
+    for row in ws.iter_rows(min_row=2, values_only=True):
+        filename, keywords_str = row
+        keys = keywords_str.split(', ') if keywords_str else []
+        data.append({"filename": filename, "keywords": keys})
+    
+    # Get the list of search words from the form
+    search_words = request.form.getlist('search_word')
+
+    # Check if search words are provided
+    if len(search_words) == 0:
+        search_words = keywords
+
+    results = {}
+    for entry in data:
+        filename = entry["filename"]
+        keys = entry["keywords"]
+        found_count = sum(word.lower() in [kw.lower() for kw in keys] for word in search_words)
+        total_words = len(search_words)
+        score = round((found_count / total_words) * 100)
+        results[filename] = {"score": score, "date": get_date_from_filename(filename)}
+
+     # Sort the results based on the score in descending order
+    sorted_results = dict(sorted(results.items(), key=lambda item: (item[1]['score'], item[1]['date']), reverse=True))
+    
+    # Extract file names and scores separately
+    file_names = list(sorted_results.keys())
+    scores = [sorted_results[filename]['score'] for filename in file_names]
+
+    # Zip the file names and scores together
+    file_scores = list(zip(file_names, scores))
+
+    return jsonify(file_scores)
+
 @app.route('/parse', methods=['POST'])
 def parse_files():
     # Check if 'file' is present in the request
@@ -49,15 +85,7 @@ def parse_files():
     except zipfile.BadZipFile:
         return jsonify({"error": "Bad Zip File"})
 
-    # Get the list of search words from the form
-    search_words = request.form.getlist('search_word')
-
-    # Check if search words are provided
-    if not search_words:
-        return jsonify({"error": "No search words provided"})
-
-    # Process each file in the zip and calculate scores
-    results = {}
+    # Process each file in the zip
     for filename, file_content in file_contents.items():
         if filename.endswith('.docx'):
             parsed_content = parse_word_document(file_content)
@@ -70,9 +98,6 @@ def parse_files():
         for key in keywords:
             if key.lower() in parsed_content.lower():
                 found_words.append(key)
-        found_count = sum(word.lower() in parsed_content.lower() for word in search_words)
-        total_words = len(search_words)
-        score = round((found_count / total_words) * 100)
         file_keywords = ', '.join(found_words)
 
         existing_row_index = None
@@ -92,21 +117,9 @@ def parse_files():
             # Add new row if filename doesn't exist
             ws.append([filename, file_keywords])
 
-        results[filename] = {"score": score, "date": get_date_from_filename(filename)}
-    
-    # Sort the results based on the score in descending order
-    sorted_results = dict(sorted(results.items(), key=lambda item: (item[1]['score'], item[1]['date']), reverse=True))
-
-    # Extract file names and scores separately
-    file_names = list(sorted_results.keys())
-    scores = [sorted_results[filename]['score'] for filename in file_names]
-
-    # Zip the file names and scores together
-    file_scores = list(zip(file_names, scores))
-
     wb.save("resumes.xlsx")
 
-    return jsonify(file_scores)
+    return jsonify(True)
 
 def parse_word_document(file_content):
     # Parse the content of a Word document
