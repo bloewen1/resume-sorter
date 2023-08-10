@@ -14,8 +14,8 @@
         <input type="submit" value="Parse">
     </form>
 
-    <form action="/delete" method="post" id="deleteForm">
-        <input type="submit" value="Delete All Resumes">
+    <form action="/download" method="get" id="downloadForm">
+        <button type="submit">Download Excel</button>
     </form>
 
     <form action="/score" method="post" enctype="multipart/form-data" id="search">
@@ -41,11 +41,16 @@
                     <th>Delete</th>
                     <th>File Name</th>
                     <th>Score</th>
+                    <th>Keywords</th>
                 </tr>
             </thead>
             <tbody id="scoreTable"></tbody>
         </table>
     </div>
+
+    <form action="/delete" method="post" id="deleteForm">
+        <input type="submit" value="Delete All Resumes">
+    </form>
 
     <script>
         // Get the form element and other necessary DOM elements
@@ -76,22 +81,27 @@
                 for (const result of results) {
                     const filename = result[0];
                     const score = result[1];
+                    const keywords = result[2];
 
-                    const row = document.createElement('tr'); // Create a new table row
-                    const fileNameCell = document.createElement('td'); // Create a new table cell for the file name
-                    const scoreCell = document.createElement('td'); // Create a new table cell for the score
-                    const deleteCell = document.createElement('td'); // Create a new table cell for the delete button
+                    const row = document.createElement('tr');
+                    const deleteCell = document.createElement('td'); // Create delete cell
+                    const fileNameCell = document.createElement('td');
+                    const scoreCell = document.createElement('td');
+                    const keywordsCell = createKeywordsField(keywords);
 
-                    deleteCell.appendChild(createDeleteButton(filename)); // Append delete button to the cell
-                    fileNameCell.textContent = filename; // Set the file name as the content of the cell
-                    scoreCell.textContent = `${score}%`; // Set the score as the content of the cell
+                    deleteCell.appendChild(createDeleteButton(filename)); // Add delete button to delete cell
 
-                    row.appendChild(deleteCell); // Add the delete cell to the row
-                    row.appendChild(fileNameCell); // Add the file name cell to the row
-                    row.appendChild(scoreCell); // Add the score cell to the row
+                    fileNameCell.textContent = filename;
+                    scoreCell.textContent = `${score}%`;
 
-                    scoreTable.appendChild(row); // Add the row to the score table
+                    row.appendChild(deleteCell); // Add delete cell to the row
+                    row.appendChild(fileNameCell);
+                    row.appendChild(scoreCell);
+                    row.appendChild(keywordsCell);
+
+                    scoreTable.appendChild(row);
                 }
+
 
                 // Show the score section after getting results
                 scoreDiv.style.display = 'block';
@@ -109,6 +119,45 @@
                 deleteRow(filename);
             });
             return deleteButton;
+        }
+
+        // Function to create a clickable keywords field for each row
+        function createKeywordsField(keywords) {
+            const keywordsField = document.createElement('td');
+            keywordsField.classList.add('keywords-cell');
+
+            // Create a list element to hold each keyword in a separate list item
+            const keywordsList = document.createElement('ul');
+            keywordsList.classList.add('keywords-list');
+
+            // Add each keyword as a list item
+            for (const keyword of keywords) {
+                const keywordItem = document.createElement('li');
+                keywordItem.textContent = keyword;
+                keywordsList.appendChild(keywordItem);
+            }
+
+            // Set initial visibility of keywords list to hidden
+            keywordsList.style.display = 'none';
+
+            // Show "View Keywords" text initially
+            const viewKeywordsText = document.createElement('div');
+            viewKeywordsText.textContent = "View Keywords";
+            keywordsField.appendChild(viewKeywordsText);
+
+            // Add click event listener to toggle keywords list visibility
+            keywordsField.addEventListener('click', () => {
+                if (keywordsList.style.display === 'block') {
+                    keywordsList.style.display = 'none'; // Hide the keywords list
+                    viewKeywordsText.style.display = 'block'; // Show "View Keywords" text
+                } else {
+                    keywordsList.style.display = 'block'; // Show the keywords list
+                    viewKeywordsText.style.display = 'none'; // Hide "View Keywords" text
+                }
+            });
+
+            keywordsField.appendChild(keywordsList);
+            return keywordsField;
         }
 
         // Function to handle row deletion

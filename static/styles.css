@@ -83,6 +83,39 @@ label {
     animation: spin 2s linear infinite; /* Animation to spin the spinner */
 }
 
+/* Table Styles */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+/* Keywords cell styles */
+.keywords-list {
+    display: none;
+    padding: 0;
+    margin: 0;
+    list-style-type: none;
+}
+
+.keywords-list li {
+    margin-bottom: 5px;
+}
+
+.keywords-cell {
+    cursor: pointer;
+}
+
 /* Keyframes for the Spinner Animation */
 @keyframes spin {
     0% {

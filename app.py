@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect
+from flask import Flask, render_template, request, jsonify, redirect, send_file
 import os
 from io import BytesIO
 from docx import Document
@@ -72,10 +72,15 @@ def rank_files():
     for entry in data:
         filename = entry["filename"]
         keys = entry["keywords"]
-        found_count = sum(word.lower() in [kw.lower() for kw in keys] for word in search_words)
+        found_words = []
+        found_count = 0
+        for word in search_words:
+            if word.lower() in [kw.lower() for kw in keys]:
+                found_words.append(word)
+                found_count += 1
         total_words = len(search_words)
         score = round((found_count / total_words) * 100)
-        results[filename] = {"score": score, "date": get_date_from_filename(filename)}
+        results[filename] = {"score": score, "keywords": found_words, "date": get_date_from_filename(filename)}
 
      # Sort the results based on the score in descending order
     sorted_results = dict(sorted(results.items(), key=lambda item: (item[1]['score'], item[1]['date']), reverse=True))
@@ -83,9 +88,10 @@ def rank_files():
     # Extract file names and scores separately
     file_names = list(sorted_results.keys())
     scores = [sorted_results[filename]['score'] for filename in file_names]
+    keys = [sorted_results[filename]['keywords'] for filename in file_names]
 
     # Zip the file names and scores together
-    file_scores = list(zip(file_names, scores))
+    file_scores = list(zip(file_names, scores, keys))
 
     return jsonify(file_scores)
 
@@ -147,6 +153,14 @@ def parse_files():
     wb.save("resumes.xlsx")
 
     return jsonify(True)
+
+@app.route('/download', methods=['GET'])
+def download_excel():
+    try:
+        return send_file("resumes.xlsx", as_attachment=True)
+    except Exception as e:
+        print("Error downloading Excel file:", e)
+        return jsonify({"error": "Failed to download Excel file"})
 
 def parse_word_document(file_content):
     # Parse the content of a Word document
