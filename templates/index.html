@@ -14,17 +14,30 @@
         <input type="submit" value="Parse">
     </form>
 
+    <form action="/add_keyword" method="post">
+        <label for="keyword_role">Select Role:</label>
+        <select name="role" id="role">
+            {% for role in roles.keys() %}
+                <option value="{{ role }}">{{ role }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="new_keyword">Add New Keyword:</label>
+        <input type="text" name="new_keyword" id="new_keyword" placeholder="Keyword">
+        <input type="submit" value="Add">
+    </form>
+
     <form action="/download" method="get" id="downloadForm">
         <button type="submit">Download Excel</button>
     </form>
 
     <form action="/score" method="post" enctype="multipart/form-data" id="search">
         <label for="search_word">Search Words:</label>
-        <input type="checkbox" name="search_word" value="Python">Python
-        <input type="checkbox" name="search_word" value="Javascript">Javascript
-        <input type="checkbox" name="search_word" value="SQL">SQL
-        <input type="checkbox" name="search_word" value="HTML">HTML
-        <input type="checkbox" name="search_word" value="Oracle">Oracle
+        <input type="checkbox" name="select_all" id="select_all">Select All
+        <br>
+        {% for key in roles["General"] %}
+            <input type="checkbox" name="search_word" value="{{key}}">{{key}}
+        {% endfor %}
         <br>
         <input type="submit" value="Load Scores">
     </form>
@@ -59,6 +72,7 @@
         const deleteForm = document.getElementById('deleteForm');
         const scoreDiv = document.getElementById('score');
         const loadingSpinner = document.getElementById('loading-spinner');
+        const selectAllCheckbox = document.getElementById('select_all');
 
         // Function to submit the score form
         function submitScoreForm() {
@@ -159,6 +173,17 @@
             keywordsField.appendChild(keywordsList);
             return keywordsField;
         }
+
+        // Add event listener to the "Select All" checkbox
+        selectAllCheckbox.addEventListener('change', () => {
+            // Get all individual checkboxes
+            const checkboxes = searchForm.querySelectorAll('input[type="checkbox"][name="search_word"]');
+            
+            // Set the state of all individual checkboxes based on the state of the "Select All" checkbox
+            for (const checkbox of checkboxes) {
+                checkbox.checked = selectAllCheckbox.checked;
+            }
+        });
 
         // Function to handle row deletion
         function deleteRow(filename) {

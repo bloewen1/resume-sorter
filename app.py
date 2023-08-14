@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, jsonify, redirect, send_file
-import os
 from io import BytesIO
 from docx import Document
 import PyPDF2
@@ -7,10 +6,19 @@ import zipfile
 import openpyxl
 import re
 from datetime import datetime
-import json
+import re
+from docx.shared import Pt, RGBColor
+import string
 
 app = Flask(__name__)
-keywords = ["Python", "Javascript", "SQL", "HTML", "Oracle"]
+keywords = ["Python", "Javascript", "SQL", "HTML", "Oracle", "Team", "M.Sc.", "Manage", "Admin"]
+roles = {
+    "General": ["Team", "M.Sc."],
+    "Developer": ["Python", "Javascript", "SQL", "HTML", "Oracle"],
+    "Project Manager": ["Manage"],
+    "Other": ["Admin"]
+}
+
 # If there's an existing workbook, open it, otherwise make a new one
 try:
     wb = openpyxl.load_workbook("resumes.xlsx")
@@ -22,10 +30,28 @@ if "Resumes" in wb.sheetnames:
 else:
     ws = wb.create_sheet("Resumes")
     ws.append(["Filename", "Keywords"])
+if "Roles" in wb.sheetnames:
+    ws2 = wb["Roles"]
+else:
+    ws2 = wb.create_sheet("Roles")
+    ws2.append(["Role", "Keywords"])
+
+for row in ws2.iter_rows(min_row=2, values_only=True):
+    keywords.append(row[1])
+    roles[row[0]].append(row[1])
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', keywords=keywords, roles=roles)
+
+@app.route('/add_keyword', methods=['POST'])
+def add_keyword():
+    role = request.form.get('role')
+    new_keyword = request.form.get('new_keyword')
+    if new_keyword not in keywords:
+        ws2.append([role, new_keyword])
+        wb.save("resumes.xlsx")
+    return redirect('/')
 
 @app.route('/delete_row', methods=['POST'])
 def delete_row():
@@ -129,7 +155,7 @@ def parse_files():
 
         found_words = []
         for key in keywords:
-            if key.lower() in parsed_content.lower():
+            if remove_punctuation(key.lower()) in parsed_content.lower():
                 found_words.append(key)
         file_keywords = ', '.join(found_words)
 
@@ -167,8 +193,18 @@ def parse_word_document(file_content):
     doc = Document(BytesIO(file_content))
     content = ""
     for paragraph in doc.paragraphs:
+        # Reset font attributes to default values
+        for run in paragraph.runs:
+            run.font.size = Pt(12)  # Reset font size to a default value
+            run.font.color.rgb = RGBColor(0, 0, 0)  # Reset font color to black
+            
+        # Add plain text content of the paragraph
         content += paragraph.text + "\n"
-    return content
+    
+    # Remove extra spaces and formatting characters
+    cleaned_content = re.sub(r'\s+', ' ', content).strip()
+    cleaned_content = remove_punctuation(cleaned_content)
+    return cleaned_content
 
 def parse_pdf(file_content):
     # Parse the content of a PDF document
@@ -180,7 +216,7 @@ def parse_pdf(file_content):
             content += page.extract_text() + "\n"
     except Exception as e:
         print("Error parsing PDF: ", e)
-    return content
+    return remove_punctuation(content)
 
 def get_date_from_filename(filename):
     match = re.search(r'\d{4}-\d{2}-\d{2}', filename)
@@ -188,6 +224,19 @@ def get_date_from_filename(filename):
         date_str = match.group(0)
         return datetime.strptime(date_str, '%Y-%m-%d')
     return datetime.min  # Return a default date if no match is found
+
+def remove_punctuation(input_string):
+    # Define a string containing all punctuation characters
+    punctuation = string.punctuation + "“”‘’"  # Adding unicode smart quotes
+    
+    # Remove punctuation using string translation
+    translator = str.maketrans('', '', punctuation)
+    cleaned_string = input_string.translate(translator)
+    
+    # Alternatively, you can use regular expressions to remove punctuation
+    cleaned_string = re.sub(r'[{}]'.format(re.escape(punctuation)), '', cleaned_string)
+    
+    return cleaned_string
 
 if __name__ == '__main__':
     # Set the maximum content length for file uploads to 250 MB
