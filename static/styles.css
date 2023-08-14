@@ -9,7 +9,7 @@ body {
 /* Heading Styles */
 h1 {
     font-size: 36px;
-    color: #ff3366;
+    color: #0074e4; /* Primary Blue */
 }
 
 /* Form Styles */
@@ -28,7 +28,7 @@ input[type="file"] {
 
 /* Submit Button Styles */
 input[type="submit"] {
-    background-color: #ff3366;
+    background-color: #0074e4; /* Primary Blue */
     color: #fff;
     border: none;
     padding: 10px 20px;
@@ -38,7 +38,7 @@ input[type="submit"] {
 }
 
 input[type="submit"]:hover {
-    background-color: #e6005c;
+    background-color: #005abf; /* Darker Blue */
 }
 
 /* Label Styles */
@@ -61,7 +61,7 @@ label {
 
 #score h2 {
     font-size: 24px;
-    color: #ff3366;
+    color: #0074e4; /* Primary Blue */
 }
 
 /* Score Text Styles */
@@ -77,10 +77,25 @@ label {
     left: 50%;
     width: 50px;
     height: 50px;
-    border: 4px solid rgba(255, 255, 255, 0.3);
+    border: 3px solid rgb(255, 255, 255);
     border-radius: 50%;
-    border-top: 4px solid #ff3366;
+    border-top: 4px solid #0c77f0; /* Primary Blue */
     animation: spin 2s linear infinite; /* Animation to spin the spinner */
+    
+} 
+
+
+#CX_LOGO{
+    display: none;
+    position: absolute;
+    top: 47%;
+    left: 48.5%;
+    width: 55px;
+    height: 55px; 
+    border-radius: 50%;
+	transform: scale(1);
+    animation: pulse 4s infinite;
+    
 }
 
 /* Table Styles */
@@ -116,6 +131,33 @@ th {
     cursor: pointer;
 }
 
+/* Delete Button Styles */
+#deleteForm {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #0074e4; /* Primary Blue */
+    padding: 10px 0 ;
+    text-align: center;
+    
+}
+
+#deleteForm input[type="submit"] {
+    background-color: #fff;
+    color: #0074e4; /* Primary Blue */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#deleteForm input[type="submit"]:hover {
+    background-color: #d6d3d3; /* Light Grey */
+    color: #0074e4; /* Primary Blue */
+}
+
 /* Keyframes for the Spinner Animation */
 @keyframes spin {
     0% {
@@ -125,3 +167,85 @@ th {
         transform: translate(-50%, -50%) rotate(360deg);
     }
 }
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.8);
+    }
+}
+
+/* File Input Styles */
+input[type="file"] {
+    /* Hide the default button text */
+    display: none;
+}
+
+/* Style the custom button */
+input[type="file"] + label {
+    background-color: #0074e4; /* Primary Blue */
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+ 
+}
+
+input[type="file"] + label:hover {
+    background-color: #005abf; /* Darker Blue */
+}
+
+
+
+/* Common Button Styles */
+.common-button {
+    background-color: #0074e4; /* Primary Blue */
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    width: 150px; /* Adjust the width as needed */
+    height: 40px;
+}
+
+.common-button:hover {
+    background-color: #005abf; /* Darker Blue */
+}
+
+/* Add this style definition */
+.selected-file-name {
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
+
+
+/* File Input Styles */
+input[type="file"] {
+    margin-bottom: 10px;
+}
+
+/* Submit Button Styles */
+input[type="submit"] {
+    background-color: #0074e4; /* Primary Blue */
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+input[type="submit"]:hover {
+    background-color: #005abf; /* Darker Blue */
+}
+
+

@@ -1,17 +1,34 @@
 <!-- index.html -->
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>File Parser</title>
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
 </head>
+
 <body>
     <!-- File Upload Form -->
     <h1>Upload a Zip File Containing Word Documents or PDFs</h1>
     <form action="/parse" method="post" enctype="multipart/form-data" id="parse">
-        <input type="file" name="file">
-        <input type="submit" value="Parse">
+        <label for="fileInput" class="common-button">Choose File</label>
+        <input type="file" name="file" id="fileInput">
+        <span id="selectedFileName" class="selected-file-name"></span>
+        <input type="submit" value="Parse" class="common-button">
+    </form>
+
+    <form action="/add_keyword" method="post">
+        <label for="keyword_role">Select Role:</label>
+        <select name="role" id="role">
+            {% for role in roles.keys() %}
+                <option value="{{ role }}">{{ role }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="new_keyword">Add New Keyword:</label>
+        <input type="text" name="new_keyword" id="new_keyword" placeholder="Keyword">
+        <input type="submit" value="Add">
     </form>
 
     <form action="/add_keyword" method="post">
@@ -28,22 +45,43 @@
     </form>
 
     <form action="/download" method="get" id="downloadForm">
-        <button type="submit">Download Excel</button>
+        <button type="submit" class="common-button">Download Excel</button>
     </form>
 
     <form action="/score" method="post" enctype="multipart/form-data" id="search">
-        <label for="search_word">Search Words:</label>
-        <input type="checkbox" name="select_all" id="select_all">Select All
+
+        <label for="role">Select Role:</label>
+        <select id="role" name="role">
+            <option value="Software Engineer">Software Engineer</option>
+            <option value="Web Developer">Web Developer</option>
+            <option value="Database Administrator">Database Administrator</option>
+        </select>
+
+        <div id="searchWordsContainer">
+            <label for="search_word">Search Words:</label>
+            <input type="checkbox" name="search_word" value="Python">Python
+            <input type="checkbox" name="search_word" value="Javascript">Javascript
+            <input type="checkbox" name="search_word" value="SQL">SQL
+            <input type="checkbox" name="search_word" value="HTML">HTML
+            <input type="checkbox" name="search_word" value="Oracle">Oracle
+        </div>
+
+
+
         <br>
-        {% for key in roles["General"] %}
-            <input type="checkbox" name="search_word" value="{{key}}">{{key}}
-        {% endfor %}
-        <br>
-        <input type="submit" value="Load Scores">
+        <input type="submit" value="Load Scores" class="common-button">
     </form>
 
     <!-- Loading Spinner -->
     <div id="loading-spinner"></div>
+    <!-- CX Logo -->
+    <div>
+        <img src="https://cxcanada.sharepoint.com/sites/ourplace/SiteAssets/Site%20Graphics/CX%20logo.png" alt="Loading"
+            id="CX_LOGO">
+    </div>
+
+
+
 
     <!-- Score Display -->
     <div id="score" style="display: none;">
@@ -62,7 +100,7 @@
     </div>
 
     <form action="/delete" method="post" id="deleteForm">
-        <input type="submit" value="Delete All Resumes">
+        <input type="submit" value="Delete All Resumes" class="common-button">
     </form>
 
     <script>
@@ -73,6 +111,16 @@
         const scoreDiv = document.getElementById('score');
         const loadingSpinner = document.getElementById('loading-spinner');
         const selectAllCheckbox = document.getElementById('select_all');
+        const CX_LOGO = document.getElementById('CX_LOGO');
+        const file_border = document.getElementsByClassName("selected-file-name");
+
+        // Dictionary that maps each role to its relevant keywords
+        const role_keywords = {
+            "Software Engineer": ["Python", "JavaScript", "SQL", "HTML", "Orcale",],
+            "Web Developer": ["Javascript", "HTML", "CSS", "React", "Node.js", "API"],
+            "Database Administrator": ["SQL", "Database Management", "Query Optimization", "Backup and Recovery"]
+        };
+
 
         // Function to submit the score form
         function submitScoreForm() {
@@ -82,47 +130,47 @@
                 method: 'POST',
                 body: formData,
             })
-            .then(response => response.json())
-            .then(results => {
-                // Handle and display the results as needed
-                const scoreTable = document.getElementById('scoreTable');
-                scoreTable.innerHTML = ''; // Clear any previous content from the score table
+                .then(response => response.json())
+                .then(results => {
+                    // Handle and display the results as needed
+                    const scoreTable = document.getElementById('scoreTable');
+                    scoreTable.innerHTML = ''; // Clear any previous content from the score table
 
-                // Sort results based on score in descending order
-                results.sort((a, b) => b[1] - a[1]);
+                    // Sort results based on score in descending order
+                    results.sort((a, b) => b[1] - a[1]);
 
-                // Populate the score table with the sorted results
-                for (const result of results) {
-                    const filename = result[0];
-                    const score = result[1];
-                    const keywords = result[2];
+                    // Populate the score table with the sorted results
+                    for (const result of results) {
+                        const filename = result[0];
+                        const score = result[1];
+                        const keywords = result[2];
 
-                    const row = document.createElement('tr');
-                    const deleteCell = document.createElement('td'); // Create delete cell
-                    const fileNameCell = document.createElement('td');
-                    const scoreCell = document.createElement('td');
-                    const keywordsCell = createKeywordsField(keywords);
+                        const row = document.createElement('tr');
+                        const deleteCell = document.createElement('td'); // Create delete cell
+                        const fileNameCell = document.createElement('td');
+                        const scoreCell = document.createElement('td');
+                        const keywordsCell = createKeywordsField(keywords);
 
-                    deleteCell.appendChild(createDeleteButton(filename)); // Add delete button to delete cell
+                        deleteCell.appendChild(createDeleteButton(filename)); // Add delete button to delete cell
 
-                    fileNameCell.textContent = filename;
-                    scoreCell.textContent = `${score}%`;
+                        fileNameCell.textContent = filename;
+                        scoreCell.textContent = `${score}%`;
 
-                    row.appendChild(deleteCell); // Add delete cell to the row
-                    row.appendChild(fileNameCell);
-                    row.appendChild(scoreCell);
-                    row.appendChild(keywordsCell);
+                        row.appendChild(deleteCell); // Add delete cell to the row
+                        row.appendChild(fileNameCell);
+                        row.appendChild(scoreCell);
+                        row.appendChild(keywordsCell);
 
-                    scoreTable.appendChild(row);
-                }
+                        scoreTable.appendChild(row);
+                    }
 
 
-                // Show the score section after getting results
-                scoreDiv.style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                    // Show the score section after getting results
+                    scoreDiv.style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         }
 
         // Function to create a delete button for each row
@@ -194,16 +242,16 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    // Reload the score table after successful deletion
-                    submitScoreForm();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        // Reload the score table after successful deletion
+                        submitScoreForm();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
         }
 
         // Add event listener to the parse button
@@ -211,6 +259,8 @@
             event.preventDefault();
             const formData = new FormData(parseForm); // Get the form data
             loadingSpinner.style.display = 'block'; // Show the loading spinner
+            CX_LOGO.style.display = 'block'; // Show the loading spinner
+
 
             try {
                 const response = await fetch('/parse', { // Send the form data to the server for processing
@@ -219,6 +269,7 @@
                 });
 
                 loadingSpinner.style.display = 'none'; // Hide the loading spinner after receiving the response
+                CX_LOGO.style.display = 'none';
 
                 if (!response.ok) {
                     throw new Error(`Server returned an error. Status: ${response.status}`);
@@ -233,6 +284,19 @@
             }
         });
 
+        // Add event listener to the file input
+        const fileInput = document.getElementById('fileInput');
+        const selectedFileName = document.getElementById('selectedFileName');
+
+        fileInput.addEventListener('change', () => {
+            // Update the selected file name
+            if (fileInput.files.length > 0) {
+                selectedFileName.textContent = fileInput.files[0].name;
+            } else {
+                selectedFileName.textContent = '';
+            }
+        });
+
         // Add event listener to the form submit button
         searchForm.addEventListener('submit', async (event) => {
             event.preventDefault(); // Prevent default form submission
@@ -243,6 +307,40 @@
             // Trigger the "Load Scores" form submission when the page loads
             submitScoreForm();
         });
-    </script>    
+
+        // Function to update search words based on selected role
+        function updateSearchWords() {
+            const roleSelect = document.getElementById('role');
+            const searchWordsContainer = document.getElementById('searchWordsContainer');
+            const selectedRole = roleSelect.value;
+
+            // Get the search words for the selected role from the role_keywords dictionary
+            const roleKeywords = role_keywords[selectedRole];
+
+            // Clear existing search words
+            searchWordsContainer.innerHTML = '';
+
+            // Populate search words as checkboxes
+            for (const keyword of roleKeywords) {
+                const label = document.createElement('label');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'search_word';
+                checkbox.value = keyword;
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(keyword));
+                searchWordsContainer.appendChild(label);
+            }
+        }
+
+        // Add event listener to role select
+        const roleSelect = document.getElementById('role');
+        roleSelect.addEventListener('change', updateSearchWords);
+
+        // Call the function initially to populate search words based on the default role
+        updateSearchWords();
+
+    </script>
 </body>
+
 </html>
