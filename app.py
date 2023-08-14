@@ -183,14 +183,16 @@ def parse_pdf(file_content):
     return content
 
 def get_date_from_filename(filename):
+    if filename is None:
+        return datetime.min  # Return a default date if filename is None
     match = re.search(r'\d{4}-\d{2}-\d{2}', filename)
     if match:
         date_str = match.group(0)
         return datetime.strptime(date_str, '%Y-%m-%d')
     return datetime.min  # Return a default date if no match is found
 
+
 if __name__ == '__main__':
     # Set the maximum content length for file uploads to 250 MB
     app.config['MAX_CONTENT_LENGTH'] = 250 * 1024 * 1024
     app.run(debug=True)
-
