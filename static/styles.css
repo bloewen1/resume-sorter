@@ -95,6 +95,7 @@ label {
     border-radius: 50%;
 	transform: scale(1);
     animation: pulse 4s infinite;
+    background-color: white;
     
 }
 
