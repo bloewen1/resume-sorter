@@ -10,8 +10,12 @@ import re
 from docx.shared import Pt, RGBColor
 import string
 
-app = Flask(__name__)
+# Create a Flask app and links to the static folder
+app = Flask(__name__, static_url_path='/static')
+
+# Define a list of keywords to search for
 keywords = []
+# Defines a dictionary of roles and keywords
 roles = {
     "General": ["Team", "Diploma"],
     "Developer": ["Python", "Javascript", "SQL", "HTML", "Oracle"],
