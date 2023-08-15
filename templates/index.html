@@ -267,8 +267,10 @@
             // Update the selected file name
             if (fileInput.files.length > 0) {
                 selectedFileName.textContent = fileInput.files[0].name;
+                selectedFileName.style.display = 'inline';
             } else {
                 selectedFileName.textContent = '';
+                selectedFileName.style.display = 'none';
             }
         });
 

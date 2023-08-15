@@ -248,4 +248,7 @@ input[type="submit"]:hover {
     background-color: #005abf; /* Darker Blue */
 }
 
-
+/* For file input */
+.selected-file-name {
+    display: none;
+}
