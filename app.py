@@ -49,9 +49,10 @@ def index():
 def add_keyword():
     role = request.form.get('role')
     new_keyword = request.form.get('new_keyword')
-    if new_keyword not in keywords:
-        ws2.append([role, new_keyword])
-        wb.save("resumes.xlsx")
+    if new_keyword:
+        if new_keyword not in keywords:
+            ws2.append([role, new_keyword])
+            wb.save("resumes.xlsx")
     return redirect('/')
 
 @app.route('/delete_row', methods=['POST'])

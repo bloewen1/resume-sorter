@@ -48,7 +48,7 @@
         </select>
         <br>
         <div id="keywordsRow">
-            <div id="generalWords">
+            <div id="General">
                 {% for word in roles["General"] %}
                     <input type="checkbox" name= "search_word" value="{{ word }}">{{ word }}
                 {% endfor %}
@@ -327,10 +327,25 @@
 
         // Add event listener to the "Select All" checkbox
         selectAllCheckbox.addEventListener('change', () => {
-            // Get all individual checkboxes
-            const checkboxes = searchForm.querySelectorAll('input[type="checkbox"][name="search_word"]');
+            console.log("Select all checkbox change")
+            const selectedRole = roleSelect.value;
+            const selectedRoleDiv = document.getElementById(selectedRole);
+            const generalRoleDiv = document.getElementById('General');
 
-            // Set the state of all individual checkboxes based on the state of the "Select All" checkbox
+            // Unselect all checkboxes first
+            const checkboxes = selectedRoleDiv.querySelectorAll('input[type="checkbox"][name="search_word"]');
+            console.log(checkboxes)
+            for (const checkbox of checkboxes) {
+                checkbox.checked = false;
+            }
+
+            const generalCheckboxes = generalRoleDiv.querySelectorAll('input[type="checkbox"][name="search_word"]');
+            console.log(generalCheckboxes)
+            for (const checkbox of generalCheckboxes) {
+                checkbox.checked = selectAllCheckbox.checked;
+            }
+            
+            // For other roles, select visible keywords in the selected role's div
             for (const checkbox of checkboxes) {
                 checkbox.checked = selectAllCheckbox.checked;
             }
