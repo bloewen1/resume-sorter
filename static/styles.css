@@ -251,3 +251,13 @@ input[type="submit"]:hover {
 .role-div {
     display: none;
 }
+
+/* Button style when pressed */
+input[type="submit"]:active {
+    background-color: #003482; /* Even Darker Blue */
+}
+
+/* For file input */
+.selected-file-name {
+    display: none;
+}
