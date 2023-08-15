@@ -37,24 +37,40 @@
 
     <form action="/score" method="post" enctype="multipart/form-data" id="search">
 
-        <label for="role">Select Role:</label>
-        <select id="role1" name="role">
-            <option value="Software Engineer">Software Engineer</option>
-            <option value="Web Developer">Web Developer</option>
-            <option value="Database Administrator">Database Administrator</option>
+        <label for="role1">Select Role:</label>
+        <select id="role1" name="role1">
+            {% for role in roles.keys() %}
+                {% if role != "General" %}
+                    <option value="{{ role }}">{{ role }}</option>
+                {% endif %}
+            {% endfor %}
         </select>
+        <br>
+        <input type="checkbox" name="select_all" id="select_all">Select All
 
-        <div id="searchWordsContainer">
-            <label for="search_word">Search Words:</label>
-            <input type="checkbox" name="search_word" value="Python">Python
-            <input type="checkbox" name="search_word" value="Javascript">Javascript
-            <input type="checkbox" name="search_word" value="SQL">SQL
-            <input type="checkbox" name="search_word" value="HTML">HTML
-            <input type="checkbox" name="search_word" value="Oracle">Oracle
+        <div id="generalWords">
+            {% for word in roles["General"] %}
+                <input type="checkbox" name= "search_word" value="{{ word }}">{{ word }}
+            {% endfor %}
         </div>
 
+        <div id="Developer" class="role-div">
+            {% for keyword in roles["Developer"] %}
+                <input type="checkbox" name="search_word" value="{{ keyword }}">{{ keyword }}
+            {% endfor %}
+        </div>
 
+        <div id="Project Manager" class="role-div">
+            {% for keyword in roles["Project Manager"] %}
+                <input type="checkbox" name="search_word" value="{{ keyword }}">{{ keyword }}
+            {% endfor %}
+        </div>
 
+        <div id="Other" class="role-div">
+            {% for keyword in roles["Other"] %}
+                <input type="checkbox" name="search_word" value="{{ keyword }}">{{ keyword }}
+            {% endfor %}
+        </div>
         <br>
         <input type="submit" value="Load Scores" class="common-button">
     </form>
@@ -99,13 +115,7 @@
         const loadingSpinner = document.getElementById('loading-spinner');
         const CX_LOGO = document.getElementById('CX_LOGO');
         const file_border = document.getElementsByClassName("selected-file-name");
-
-        // Dictionary that maps each role to its relevant keywords
-        const role_keywords = {
-            "Software Engineer": ["Python", "JavaScript", "SQL", "HTML", "Orcale",],
-            "Web Developer": ["Javascript", "HTML", "CSS", "React", "Node.js", "API"],
-            "Database Administrator": ["SQL", "Database Management", "Query Optimization", "Backup and Recovery"]
-        };
+        const selectAllCheckbox = document.getElementById('select_all');
 
 
         // Function to submit the score form
@@ -229,6 +239,35 @@
                 });
         }
 
+
+        // Add event listener to role select
+        const roleSelect = document.getElementById('role1');
+        roleSelect.addEventListener('change', updateSearchWords);
+
+        // Function to show/hide div elements based on selected role
+        function showDivForRole(selectedRole) {
+            // Hide all div elements
+            const allDivs = document.querySelectorAll('.role-div');
+            allDivs.forEach(div => {
+                div.style.display = 'none';
+            });
+
+            // Show the selected role's div
+            const selectedDiv = document.getElementById(selectedRole);
+            if (selectedDiv) {
+                selectedDiv.style.display = 'block';
+            }
+        }
+
+        // Function to update search words based on selected role
+        function updateSearchWords() {
+            const roleSelect = document.getElementById('role1');
+            const selectedRole = roleSelect.value;
+            
+            // Show/hide divs based on selected role
+            showDivForRole(selectedRole);
+        }
+
         // Add event listener to the parse button
         parseForm.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -283,34 +322,16 @@
             submitScoreForm();
         });
 
-        // Function to update search words based on selected role
-        function updateSearchWords() {
-            const roleSelect = document.getElementById('role1');
-            const searchWordsContainer = document.getElementById('searchWordsContainer');
-            const selectedRole = roleSelect.value;
+        // Add event listener to the "Select All" checkbox
+        selectAllCheckbox.addEventListener('change', () => {
+            // Get all individual checkboxes
+            const checkboxes = searchForm.querySelectorAll('input[type="checkbox"][name="search_word"]');
 
-            // Get the search words for the selected role from the role_keywords dictionary
-            const roleKeywords = role_keywords[selectedRole];
-
-            // Clear existing search words
-            searchWordsContainer.innerHTML = '';
-
-            // Populate search words as checkboxes
-            for (const keyword of roleKeywords) {
-                const label = document.createElement('label');
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.name = 'search_word';
-                checkbox.value = keyword;
-                label.appendChild(checkbox);
-                label.appendChild(document.createTextNode(keyword));
-                searchWordsContainer.appendChild(label);
+            // Set the state of all individual checkboxes based on the state of the "Select All" checkbox
+            for (const checkbox of checkboxes) {
+                checkbox.checked = selectAllCheckbox.checked;
             }
-        }
-
-        // Add event listener to role select
-        const roleSelect = document.getElementById('role1');
-        roleSelect.addEventListener('change', updateSearchWords);
+        });
 
         // Call the function initially to populate search words based on the default role
         updateSearchWords();

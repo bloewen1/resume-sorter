@@ -11,9 +11,9 @@ from docx.shared import Pt, RGBColor
 import string
 
 app = Flask(__name__)
-keywords = ["Python", "Javascript", "SQL", "HTML", "Oracle", "Team", "M.Sc.", "Manage", "Admin"]
+keywords = []
 roles = {
-    "General": ["Team", "M.Sc."],
+    "General": ["Team", "Diploma"],
     "Developer": ["Python", "Javascript", "SQL", "HTML", "Oracle"],
     "Project Manager": ["Manage"],
     "Other": ["Admin"]
@@ -37,8 +37,9 @@ else:
     ws2.append(["Role", "Keywords"])
 
 for row in ws2.iter_rows(min_row=2, values_only=True):
-    keywords.append(row[1])
     roles[row[0]].append(row[1])
+
+keywords = roles["General"] + roles["Developer"] + roles["Project Manager"] + roles["Other"]
 
 @app.route('/')
 def index():

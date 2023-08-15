@@ -248,4 +248,6 @@ input[type="submit"]:hover {
     background-color: #005abf; /* Darker Blue */
 }
 
-
+.role-div {
+    display: none;
+}
