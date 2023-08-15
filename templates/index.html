@@ -18,40 +18,27 @@
         <input type="submit" value="Parse" class="common-button">
     </form>
 
-    <form action="/add_keyword" method="post">
-        <label for="keyword_role">Select Role:</label>
-        <select name="role" id="role">
-            {% for role in roles.keys() %}
-                <option value="{{ role }}">{{ role }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <label for="new_keyword">Add New Keyword:</label>
-        <input type="text" name="new_keyword" id="new_keyword" placeholder="Keyword">
-        <input type="submit" value="Add">
-    </form>
-
-    <form action="/add_keyword" method="post">
-        <label for="keyword_role">Select Role:</label>
-        <select name="role" id="role">
-            {% for role in roles.keys() %}
-                <option value="{{ role }}">{{ role }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <label for="new_keyword">Add New Keyword:</label>
-        <input type="text" name="new_keyword" id="new_keyword" placeholder="Keyword">
-        <input type="submit" value="Add">
-    </form>
-
     <form action="/download" method="get" id="downloadForm">
         <button type="submit" class="common-button">Download Excel</button>
+    </form>
+
+    <form action="/add_keyword" method="post">
+        <label for="keyword_role">Select Role:</label>
+        <select name="role" id="role">
+            {% for role in roles.keys() %}
+                <option value="{{ role }}">{{ role }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="new_keyword">Add New Keyword:</label>
+        <input type="text" name="new_keyword" id="new_keyword" placeholder="Keyword">
+        <input type="submit" value="Add">
     </form>
 
     <form action="/score" method="post" enctype="multipart/form-data" id="search">
 
         <label for="role">Select Role:</label>
-        <select id="role" name="role">
+        <select id="role1" name="role">
             <option value="Software Engineer">Software Engineer</option>
             <option value="Web Developer">Web Developer</option>
             <option value="Database Administrator">Database Administrator</option>
@@ -110,7 +97,6 @@
         const deleteForm = document.getElementById('deleteForm');
         const scoreDiv = document.getElementById('score');
         const loadingSpinner = document.getElementById('loading-spinner');
-        const selectAllCheckbox = document.getElementById('select_all');
         const CX_LOGO = document.getElementById('CX_LOGO');
         const file_border = document.getElementsByClassName("selected-file-name");
 
@@ -222,17 +208,6 @@
             return keywordsField;
         }
 
-        // Add event listener to the "Select All" checkbox
-        selectAllCheckbox.addEventListener('change', () => {
-            // Get all individual checkboxes
-            const checkboxes = searchForm.querySelectorAll('input[type="checkbox"][name="search_word"]');
-            
-            // Set the state of all individual checkboxes based on the state of the "Select All" checkbox
-            for (const checkbox of checkboxes) {
-                checkbox.checked = selectAllCheckbox.checked;
-            }
-        });
-
         // Function to handle row deletion
         function deleteRow(filename) {
             fetch('/delete_row', {
@@ -310,7 +285,7 @@
 
         // Function to update search words based on selected role
         function updateSearchWords() {
-            const roleSelect = document.getElementById('role');
+            const roleSelect = document.getElementById('role1');
             const searchWordsContainer = document.getElementById('searchWordsContainer');
             const selectedRole = roleSelect.value;
 
@@ -334,7 +309,7 @@
         }
 
         // Add event listener to role select
-        const roleSelect = document.getElementById('role');
+        const roleSelect = document.getElementById('role1');
         roleSelect.addEventListener('change', updateSearchWords);
 
         // Call the function initially to populate search words based on the default role

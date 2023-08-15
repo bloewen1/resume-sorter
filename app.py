@@ -221,11 +221,26 @@ def parse_pdf(file_content):
 def get_date_from_filename(filename):
     if filename is None:
         return datetime.min  # Return a default date if filename is None
+    if filename is None:
+        return datetime.min  # Return a default date if filename is None
     match = re.search(r'\d{4}-\d{2}-\d{2}', filename)
     if match:
         date_str = match.group(0)
         return datetime.strptime(date_str, '%Y-%m-%d')
     return datetime.min  # Return a default date if no match is found
+
+def remove_punctuation(input_string):
+    # Define a string containing all punctuation characters
+    punctuation = string.punctuation + "“”‘’"  # Adding unicode smart quotes
+    
+    # Remove punctuation using string translation
+    translator = str.maketrans('', '', punctuation)
+    cleaned_string = input_string.translate(translator)
+    
+    # Alternatively, you can use regular expressions to remove punctuation
+    cleaned_string = re.sub(r'[{}]'.format(re.escape(punctuation)), '', cleaned_string)
+    
+    return cleaned_string
 
 if __name__ == '__main__':
     # Set the maximum content length for file uploads to 250 MB
