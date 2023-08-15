@@ -49,6 +49,7 @@ label {
 /* Score Section Styles */
 #score {
     margin-top: 20px;
+    margin-bottom: 100px;
     background-color: #fff;
     padding: 10px;
     border-radius: 4px;
