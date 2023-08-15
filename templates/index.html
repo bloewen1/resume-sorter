@@ -30,7 +30,7 @@
             {% endfor %}
         </select>
         <br>
-        <label for="new_keyword">Add New Keyword:</label>
+        <label for="new_keyword">Add New Keyword to Database:</label>
         <input type="text" name="new_keyword" id="new_keyword" placeholder="Keyword">
         <input type="submit" value="Add">
     </form>
@@ -46,30 +46,33 @@
             {% endfor %}
         </select>
         <br>
-        <input type="checkbox" name="select_all" id="select_all">Select All
+        <div id="keywordsRow">
+            <div id="generalWords">
+                {% for word in roles["General"] %}
+                    <input type="checkbox" name= "search_word" value="{{ word }}">{{ word }}
+                {% endfor %}
+            </div>
 
-        <div id="General">
-            {% for word in roles["General"] %}
-                <input type="checkbox" name= "search_word" value="{{ word }}">{{ word }}
-            {% endfor %}
+            <div id="Developer" class="role-div">
+                {% for keyword in roles["Developer"] %}
+                    <input type="checkbox" name="search_word" value="{{ keyword }}">{{ keyword }}
+                {% endfor %}
+            </div>
+
+            <div id="Project Manager" class="role-div">
+                {% for keyword in roles["Project Manager"] %}
+                    <input type="checkbox" name="search_word" value="{{ keyword }}">{{ keyword }}
+                {% endfor %}
+            </div>
+
+            <div id="Other" class="role-div">
+                {% for keyword in roles["Other"] %}
+                    <input type="checkbox" name="search_word" value="{{ keyword }}">{{ keyword }}
+                {% endfor %}
+            </div>
         </div>
-
-        <div id="Developer" class="role-div">
-            {% for keyword in roles["Developer"] %}
-                <input type="checkbox" name="search_word" value="{{ keyword }}">{{ keyword }}
-            {% endfor %}
-        </div>
-
-        <div id="Project Manager" class="role-div">
-            {% for keyword in roles["Project Manager"] %}
-                <input type="checkbox" name="search_word" value="{{ keyword }}">{{ keyword }}
-            {% endfor %}
-        </div>
-
-        <div id="Other" class="role-div">
-            {% for keyword in roles["Other"] %}
-                <input type="checkbox" name="search_word" value="{{ keyword }}">{{ keyword }}
-            {% endfor %}
+        <div id="selectAllRow">
+            <input type="checkbox" name="select_all" id="select_all">Select All
         </div>
         <br>
         <input type="submit" value="Load Scores" class="common-button">
@@ -82,9 +85,6 @@
         <img src="https://cxcanada.sharepoint.com/sites/ourplace/SiteAssets/Site%20Graphics/CX%20logo.png" alt="Loading"
             id="CX_LOGO">
     </div>
-
-
-
 
     <!-- Score Display -->
     <div id="score" style="display: none;">
@@ -103,7 +103,7 @@
     </div>
 
     <form action="/delete" method="post" id="deleteForm">
-        <input type="submit" value="Delete All Resumes" class="common-button">
+        <input type="button" id="deleteButton" value="Delete All Resumes" class="common-button">
     </form>
 
     <script>
@@ -352,6 +352,48 @@
 
         // Call the function initially to populate search words based on the default role
         updateSearchWords();
+
+        // Function for handling the Delete button state
+        const deleteButton = document.getElementById('deleteButton');
+        let deleteConfirmation = false; // Flag to track whether user confirmed deletion
+        let countdownInterval;
+
+        // Function to start the countdown for deletion confirmation
+        function startCountdown() {
+            let countdown = 5; // Countdown in seconds
+            deleteButton.style.color = 'red'; // Change text color to red
+            deleteButton.value = `Are you sure? (${countdown})`;
+
+            countdownInterval = setInterval(() => {
+                countdown--;
+                deleteButton.value = `Are you sure? (${countdown})`;
+
+                if (countdown <= 0) {
+                    clearInterval(countdownInterval);
+                    deleteButton.value = 'Delete All Resumes';
+                    deleteButton.style.color = ''; // Reset text color
+                    deleteConfirmation = false;
+                }
+            }, 1000);
+        }
+
+        // Add click event listener to the "Delete All Resumes" button
+        deleteButton.addEventListener('click', () => {
+            if (!deleteConfirmation) {
+                // First click, start countdown for deletion confirmation
+                deleteConfirmation = true;
+                startCountdown();
+            } else {
+                // Second click, proceed with form submission
+                clearInterval(countdownInterval); // Clear the countdown interval
+                deleteButton.style.color = ''; // Reset text color
+                deleteButton.textContent = 'Deleting...'; // Indicate deletion process
+
+                const deleteForm = document.getElementById('deleteForm');
+                deleteForm.submit(); // Submit the form
+            }
+        });
+
 
     </script>
 </body>
