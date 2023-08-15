@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\rust_keyword_analysis_lib",
+    "\\rust_keyword_analysis_lib\\src"
   ],
-  "SelectedNode": "\\C:\\Users\\aaron.laitner\\Source\\Repos\\resume-sorter",
+  "SelectedNode": "\\rust_keyword_analysis_lib",
   "PreviewInSolutionExplorer": false
 }

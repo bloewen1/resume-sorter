@@ -23,6 +23,11 @@
         <button type="submit" class="common-button">Download Excel</button>
     </form>
 
+    <h3>Keyword Analysis</h3>
+    <textarea id="inputContents" rows="10" cols="50"></textarea>
+    <button id="analyzeKeywords">Analyze Keywords</button>
+    <div id="analysisResult"></div>
+
     <form action="/add_keyword" method="post">
         <label for="keyword_role">Select Role:</label>
         <select name="role" id="role">

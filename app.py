@@ -1,3 +1,4 @@
+from ctypes import cdll, c_char_p, c_size_t
 from flask import Flask, render_template, request, jsonify, redirect, send_file
 from io import BytesIO
 from docx import Document
@@ -12,6 +13,14 @@ import string
 
 # Create a Flask app and links to the static folder
 app = Flask(__name__, static_url_path='/static')
+
+# Load the Rust shared library
+rust_lib_path = r"C:\Users\aaron.laitner\Source\Repos\resume-sorter\rust_code\rust_keyword_analysis_lib\target\release\rust_keyword_analysis_lib.dll"
+rust_lib = cdll.LoadLibrary(rust_lib_path)
+
+# Define the analyze_keywords function signature
+rust_lib.analyze_keywords.argtypes = [c_char_p, c_size_t]
+rust_lib.analyze_keywords.restype = c_char_p
 
 # Define a list of keywords to search for
 keywords = []
@@ -48,6 +57,14 @@ keywords = roles["General"] + roles["Developer"] + roles["Project Manager"] + ro
 @app.route('/')
 def index():
     return render_template('index.html', keywords=keywords, roles=roles)
+
+@app.route('/analyze_keywords', methods=['POST'])
+def analyze_keywords():
+    contents = request.data
+    contents_len = len(contents)
+    result_ptr = rust_lib.analyze_keywords(contents, contents_len)
+    result = result_ptr.decode()
+    return result
 
 @app.route('/add_keyword', methods=['POST'])
 def add_keyword():

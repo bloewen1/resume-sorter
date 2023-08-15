@@ -8,6 +8,17 @@ const CX_LOGO = document.getElementById('CX_LOGO');
 const file_border = document.getElementsByClassName("selected-file-name");
 const selectAllCheckbox = document.getElementById('select_all');
 
+// send rust contents to the flask backend
+document.getElementById("analyzeKeywords").addEventListener("click", async () => {
+    const inputContents = document.getElementById("inputContents").value;
+    const response = await fetch("/analyze_keywords", {
+        method: "POST",
+        body: inputContents,
+    });
+    const result = await response.text();
+    document.getElementById("analysisResult").textContent = result;
+});
+
 
 // Function to submit the score form
 function submitScoreForm() {
