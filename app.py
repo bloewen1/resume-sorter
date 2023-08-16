@@ -15,7 +15,7 @@ import string
 app = Flask(__name__, static_url_path='/static')
 
 # Load the Rust shared library
-rust_lib_path = r"C:\Users\aaron.laitner\Source\Repos\resume-sorter\rust_code\rust_keyword_analysis_lib\target\release\rust_keyword_analysis_lib.dll"
+rust_lib_path = r"C:\Users\aaron.laitner\Source\Repos\resume-sorter\rust_keyword_analysis_lib\target\release\rust_keyword_analysis_lib.dll"
 rust_lib = cdll.LoadLibrary(rust_lib_path)
 
 # Define the analyze_keywords function signature
